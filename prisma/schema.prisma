@@ -15,4 +15,22 @@ model User {
   password   String
   mobile     String
   location   String
+  role       String  @default("")
 }
+
+model Product {
+
+  id             Int      @id @default(autoincrement())
+  name           String
+  quantity       Int
+  price          Float
+  details        String?
+  imagePath      String?
+  vendorLocation String
+  category       String
+  vendorId       Int?
+  createdAt      DateTime @default(now())
+
+  updatedAt      DateTime @updatedAt
+}
+
