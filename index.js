@@ -1,6 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
+const nodemailer = require('nodemailer');
 
 const app = express();
 
@@ -30,7 +31,32 @@ app.post('/users', async (req, res) => {
     const user = await prisma.user.create({
       data: req.body
     });
-    res.status(201).json(user);
+    
+    // Send welcome email
+    try {
+      const transporter = nodemailer.createTransporter({
+        host: process.env.SMTP_HOST || 'smtp.gmail.com',
+        port: parseInt(process.env.SMTP_PORT || '587'),
+        secure: false,
+        auth: {
+          user: process.env.SMTP_USER,
+          pass: process.env.SMTP_PASS
+        }
+      });
+      
+      await transporter.sendMail({
+        from: `"Ecom" <${process.env.SMTP_FROM || 'no-reply@ecom.com'}>`,
+        to: user.email,
+        subject: 'Welcome to Ecom!',
+        html: `<h1>Hi ${user.name}!</h1><p>Your account has been created successfully.</p><p>User ID: ${user.id}</p><p>Email: ${user.email}</p><p>Thank you!</p>`
+      });
+      console.log('Welcome email sent to', user.email);
+    } catch (emailError) {
+      console.error('Failed to send email:', emailError);
+    }
+    
+    const { password: _, ...userWithoutPassword } = user;
+    res.status(201).json(userWithoutPassword);
   } catch (error) {
     console.error('Error creating user:', error);
     res.status(500).json({ error: 'Unable to create user', details: error.message });
