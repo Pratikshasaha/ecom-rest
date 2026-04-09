@@ -9,7 +9,8 @@ async function main() {
       vendorName: 'Admin Vendor',
       password: 'superadmin',
       mobile: '0000000000',
-      location: 'Head Office'
+      location: 'Head Office',
+      role: 'superadmin'
     },
     create: {
       name: 'Super Admin',
@@ -17,7 +18,8 @@ async function main() {
       vendorName: 'Admin Vendor',
       password: 'superadmin',
       mobile: '0000000000',
-      location: 'Head Office'
+      location: 'Head Office',
+      role: 'superadmin'
     }
   });
 
