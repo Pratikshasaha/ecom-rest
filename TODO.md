@@ -1,5 +1,7 @@
-# TODO: Create DELETE /users/:id (except superadmin)
+# TODO: Create Order API
 
-- [ ] Update index.js with new route
-- [ ] Test DELETE /users/:id
-- [ ] Git commit/push/merge PR
+- [x ] Add Order model to prisma/schema.prisma
+- [x ] Run prisma migrate dev --name add_order_model (db push skip)
+- [x ] Add CRUD routes to index.js
+- [ ] Test
+- [ ] Commit/push

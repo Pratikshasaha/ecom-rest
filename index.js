@@ -244,6 +244,97 @@ app.delete('/products/:id', async (req, res) => {
   }
 });
 
+// Order routes
+app.post('/orders', async (req, res) => {
+  try {
+    const order = await prisma.order.create({
+      data: req.body
+    });
+    res.status(201).json(order);
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({ error: 'Unable to create order', details: error.message });
+  }
+});
+
+app.get('/orders', async (req, res) => {
+  try {
+    const orders = await prisma.order.findMany();
+    res.json(orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: 'Unable to fetch orders', details: error.message });
+  }
+});
+
+app.get('/orders/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid order ID' });
+    }
+
+    const order = await prisma.order.findUnique({
+      where: { id }
+    });
+
+    if (!order) {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+
+    res.json(order);
+  } catch (error) {
+    console.error('Error fetching order:', error);
+    res.status(500).json({ error: 'Unable to fetch order', details: error.message });
+  }
+});
+
+app.put('/orders/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid order ID' });
+    }
+
+    const order = await prisma.order.update({
+      where: { id },
+      data: req.body
+    });
+
+    res.json(order);
+  } catch (error) {
+    console.error('Error updating order:', error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    res.status(500).json({ error: 'Unable to update order', details: error.message });
+  }
+});
+
+app.delete('/orders/:id', async (req, res) => {
+  try {
+    const id = parseInt(req.params.id, 10);
+
+    if (Number.isNaN(id)) {
+      return res.status(400).json({ error: 'Invalid order ID' });
+    }
+
+    await prisma.order.delete({
+      where: { id }
+    });
+
+    res.json({ message: 'Order deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting order:', error);
+    if (error.code === 'P2025') {
+      return res.status(404).json({ error: 'Order not found' });
+    }
+    res.status(500).json({ error: 'Unable to delete order', details: error.message });
+  }
+});
+
 const port = process.env.PORT || 3000;
 
 if (require.main === module) {

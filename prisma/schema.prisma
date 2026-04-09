@@ -35,3 +35,18 @@ model Product {
   updatedAt      DateTime @updatedAt
 }
 
+model Order {
+  id            Int      @id @default(autoincrement())
+  productId     Int
+  quantity      Int
+  userName      String
+  mobile        String
+  address       String?
+  email         String
+  date          DateTime @default(now())
+  vendorName    String
+  paymentType   String
+  status        String  @default("pending")
+}
+
+
