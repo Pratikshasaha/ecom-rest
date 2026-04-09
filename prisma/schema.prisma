@@ -28,8 +28,9 @@ model Product {
   imagePath      String?
   vendorLocation String
   category       String
-  vendorId       Int?
+  vendorName     String?
   createdAt      DateTime @default(now())
+
 
   updatedAt      DateTime @updatedAt
 }
