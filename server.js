@@ -1,5 +1,8 @@
+require('dotenv').config();
 const express = require('express');
+const { PrismaClient } = require('@prisma/client');
 const app = express();
+const prisma = new PrismaClient();
 
 app.use(express.json());
 
@@ -15,19 +18,27 @@ app.use((req, res, next) => {
   next();
 });
 
-let users = [
-  { name: 'John Doe', email: 'john@example1.com' },
-  { name: 'Jane Doe', email: 'jane@example.com' }
-];
+app.post('/users', async (req, res) => {
+  try {
+    const user = await prisma.user.create({
+      data: req.body
+    });
 
-app.post('/users', (req, res) => {
-  const user = req.body;
-  users.push(user);
-  res.status(201).json(user);
+    res.status(201).json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Unable to create user' });
+  }
 });
 
-app.get('/users', (req, res) => {
-  res.json(users);
+app.get('/users', async (req, res) => {
+  try {
+    const users = await prisma.user.findMany();
+    res.json(users);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Unable to fetch users' });
+  }
 });
 
 module.exports = app;
