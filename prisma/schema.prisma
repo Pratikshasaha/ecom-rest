@@ -16,6 +16,7 @@ model User {
   mobile     String
   location   String
   role       String  @default("")
+  status     String? @default("approved")
 }
 
 model Product {
@@ -49,5 +50,4 @@ model Order {
   paymentType   String
   status        String  @default("pending")
 }
-
 
