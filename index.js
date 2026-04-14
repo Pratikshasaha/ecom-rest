@@ -6,9 +6,7 @@ const nodemailer = require("nodemailer");
 const app = express();
 
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "587"),
-  secure: false,
+  host: "gmail",
   auth: {
     user: process.env.SMTP_USER,
     pass: process.env.SMTP_PASS,
@@ -47,16 +45,6 @@ app.post("/users", async (req, res) => {
 
     // Send welcome email
     try {
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || "smtp.gmail.com",
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: false,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-
       await transporter.sendMail({
         from: `"Ecom" <${process.env.SMTP_FROM || "no-reply@ecom.com"}>`,
         to: user.email,
