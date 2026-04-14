@@ -31,30 +31,7 @@ app.post('/users', async (req, res) => {
     const user = await prisma.user.create({
       data: req.body
     });
-    
-    // Send welcome email
-    try {
-      const transporter = nodemailer.createTransporter({
-        host: process.env.SMTP_HOST || 'smtp.gmail.com',
-        port: parseInt(process.env.SMTP_PORT || '587'),
-        secure: false,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS
-        }
-      });
-      
-      await transporter.sendMail({
-        from: `"Ecom" <${process.env.SMTP_FROM || 'no-reply@ecom.com'}>`,
-        to: user.email,
-        subject: 'Welcome to Ecom!',
-        html: `<h1>Hi ${user.name}!</h1><p>Your account has been created successfully.</p><p>User ID: ${user.id}</p><p>Email: ${user.email}</p><p>Thank you!</p>`
-      });
-      console.log('Welcome email sent to', user.email);
-    } catch (emailError) {
-      console.error('Failed to send email:', emailError);
-    }
-    
+
     const { password: _, ...userWithoutPassword } = user;
     res.status(201).json(userWithoutPassword);
   } catch (error) {
@@ -103,6 +80,29 @@ app.put('/users/:id', async (req, res) => {
 
     if (Number.isNaN(id)) {
       return res.status(400).json({ error: 'Invalid user ID' });
+    }
+
+    if (req.body.status === 'approved') {
+      // Send welcome email
+      try {
+        const transporter = nodemailer.createTransporter({
+          service: 'gmail',
+          auth: {
+            user: 'info@rishfotechsolutions.com',
+            pass: 'Launch@12345'
+          }
+        });
+
+        await transporter.sendMail({
+          from: `"Ecom" <${'no-reply@ecom.com'}>`,
+          to: req.body.email,
+          subject: 'Welcome to Precia Ecom Store!',
+          html: `<h1>Hi ${req.body.name}!</h1><p>Your account has been Approved successfully by Precia.</p><p>User ID: ${req.body.id}</p><p>Email: ${req.body.email}</p><p>Thank you!</p>`
+        });
+        console.log('Welcome email sent to', req.body.email);
+      } catch (emailError) {
+        console.error('Failed to send email:', emailError);
+      }
     }
 
     const user = await prisma.user.update({
