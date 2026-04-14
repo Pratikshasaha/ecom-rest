@@ -1,15 +1,28 @@
-require('dotenv').config();
-const express = require('express');
-const { PrismaClient } = require('@prisma/client');
-const nodemailer = require('nodemailer');
+require("dotenv").config();
+const express = require("express");
+const { PrismaClient } = require("@prisma/client");
+const nodemailer = require("nodemailer");
 
 const app = express();
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: false,
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 app.use(express.json());
 
 app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept",
+  );
 
   if (req.method === "OPTIONS") {
     res.header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE");
@@ -22,14 +35,14 @@ app.use((req, res, next) => {
 // Initialize Prisma client
 const prisma = new PrismaClient();
 
-app.get('/test', (req, res) => {
-  res.json({ message: 'API is working!', timestamp: new Date().toISOString() });
+app.get("/test", (req, res) => {
+  res.json({ message: "API is working!", timestamp: new Date().toISOString() });
 });
 
-app.post('/users', async (req, res) => {
+app.post("/users", async (req, res) => {
   try {
     const user = await prisma.user.create({
-      data: req.body
+      data: req.body,
     });
 
     // Send welcome email
@@ -65,66 +78,60 @@ app.post('/users', async (req, res) => {
   }
 });
 
-app.get('/users', async (req, res) => {
+app.get("/users", async (req, res) => {
   try {
     const users = await prisma.user.findMany();
     res.json(users);
   } catch (error) {
-    console.error('Error fetching users:', error);
-    res.status(500).json({ error: 'Unable to fetch users', details: error.message });
+    console.error("Error fetching users:", error);
+    res
+      .status(500)
+      .json({ error: "Unable to fetch users", details: error.message });
   }
 });
 
-app.get('/users/:id', async (req, res) => {
+app.get("/users/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
 
     if (Number.isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
+      return res.status(400).json({ error: "Invalid user ID" });
     }
 
     const user = await prisma.user.findUnique({
-      where: { id }
+      where: { id },
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'User not found' });
+      return res.status(404).json({ error: "User not found" });
     }
 
     const { password: _, ...userWithoutPassword } = user;
     res.json(userWithoutPassword);
   } catch (error) {
-    console.error('Error fetching user profile:', error);
-    res.status(500).json({ error: 'Unable to fetch user profile', details: error.message });
+    console.error("Error fetching user profile:", error);
+    res
+      .status(500)
+      .json({ error: "Unable to fetch user profile", details: error.message });
   }
 });
 
-app.put('/users/:id', async (req, res) => {
+app.put("/users/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
 
     if (Number.isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid user ID' });
+      return res.status(400).json({ error: "Invalid user ID" });
     }
 
     const user = await prisma.user.update({
       where: { id },
-      data: req.body
+      data: req.body,
     });
 
     // Send approval email
     if (req.body.status == "approved") {
       try {
-        const transporter = nodemailer.createTransport({
-          host: process.env.SMTP_HOST || "smtp.gmail.com",
-          port: parseInt(process.env.SMTP_PORT || "587"),
-          secure: false,
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS,
-          },
-        });
-
         await transporter.sendMail({
           from: `"Precia" <${process.env.SMTP_FROM || "no-reply@ecom.com"}>`,
           to: req.body.email,
@@ -140,67 +147,73 @@ app.put('/users/:id', async (req, res) => {
     const { password: _, ...userWithoutPassword } = user;
     res.json(userWithoutPassword);
   } catch (error) {
-    console.error('Error updating user:', error);
-    if (error.code === 'P2025') {
-      return res.status(404).json({ error: 'User not found' });
+    console.error("Error updating user:", error);
+    if (error.code === "P2025") {
+      return res.status(404).json({ error: "User not found" });
     }
-    res.status(500).json({ error: 'Unable to update user', details: error.message });
+    res
+      .status(500)
+      .json({ error: "Unable to update user", details: error.message });
   }
 });
 
-app.post('/login', async (req, res) => {
+app.post("/login", async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email and password are required' });
+      return res.status(400).json({ error: "Email and password are required" });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user || user.password !== password) {
-      return res.status(401).json({ error: 'Invalid credentials' });
+      return res.status(401).json({ error: "Invalid credentials" });
     }
 
     const { password: _, ...userWithoutPassword } = user;
-    res.json({ message: 'Login successful', user: userWithoutPassword });
+    res.json({ message: "Login successful", user: userWithoutPassword });
   } catch (error) {
-    console.error('Error during login:', error);
-    res.status(500).json({ error: 'Login failed', details: error.message });
+    console.error("Error during login:", error);
+    res.status(500).json({ error: "Login failed", details: error.message });
   }
 });
 
 // Product routes
-app.post('/products', async (req, res) => {
+app.post("/products", async (req, res) => {
   try {
     const product = await prisma.product.create({
-      data: req.body
+      data: req.body,
     });
     res.status(201).json(product);
   } catch (error) {
-    console.error('Error creating product:', error);
-    res.status(500).json({ error: 'Unable to create product', details: error.message });
+    console.error("Error creating product:", error);
+    res
+      .status(500)
+      .json({ error: "Unable to create product", details: error.message });
   }
 });
 
-app.get('/products', async (req, res) => {
+app.get("/products", async (req, res) => {
   try {
     const products = await prisma.product.findMany();
     res.json(products);
   } catch (error) {
-    console.error('Error fetching products:', error);
-    res.status(500).json({ error: 'Unable to fetch products', details: error.message });
+    console.error("Error fetching products:", error);
+    res
+      .status(500)
+      .json({ error: "Unable to fetch products", details: error.message });
   }
 });
 
-app.get('/products/:id', async (req, res) => {
+app.get("/products/:id", async (req, res) => {
   try {
     const id = parseInt(req.params.id, 10);
 
     if (Number.isNaN(id)) {
-      return res.status(400).json({ error: 'Invalid product ID' });
+      return res.status(400).json({ error: "Invalid product ID" });
     }
 
     const product = await prisma.product.findUnique({
@@ -415,4 +428,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-
