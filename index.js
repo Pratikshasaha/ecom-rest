@@ -1,7 +1,7 @@
 require('dotenv').config();
 const express = require('express');
 const { PrismaClient } = require('@prisma/client');
-const nodemailer = require('nodemailer');
+var nodemailer = require('nodemailer');
 
 const app = express();
 
@@ -81,10 +81,9 @@ app.put('/users/:id', async (req, res) => {
     if (Number.isNaN(id)) {
       return res.status(400).json({ error: 'Invalid user ID' });
     }
-console.log('---------1------- user with ID:', id, 'Data:', req.body);
-    if (req.body.status === 'approved') {
-      // Send welcome email
-      try {
+    // Send welcome email
+    try {
+      if (req.body.status == 'approved') {
         const transporter = nodemailer.createTransporter({
           service: 'gmail',
           auth: {
@@ -100,9 +99,9 @@ console.log('---------1------- user with ID:', id, 'Data:', req.body);
           html: `<h1>Hi ${req.body.name}!</h1><p>Your account has been Approved successfully by Precia.</p><p>User ID: ${req.body.id}</p><p>Email: ${req.body.email}</p><p>Thank you!</p>`
         });
         console.log('Welcome email sent to', req.body.email);
-      } catch (emailError) {
-        console.error('Failed to send email:', emailError);
       }
+    } catch (emailError) {
+      console.error('Failed to send email:', emailError);
     }
 
     const user = await prisma.user.update({
