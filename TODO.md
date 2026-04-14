@@ -1,8 +1,5 @@
-# TODO: Add default approved status to user creation
+# Fix Nodemailer Error: nodemailer.createTransporter is not a function
 
 ## Steps:
-- [x] 1. Edit prisma/schema.prisma to add status field to User model (fixed syntax)
-- [x] 2. Run Prisma migration: npx prisma migrate dev --name add_user_status (completed successfully)
-- [x] 3. Run npx prisma generate (completed)
-- [ ] 4. Test user creation without status in body → verify default "approved"
-- [ ] 5. Mark complete
+- [x] Step 1: Edit index.js - Fix both createTransporter → createTransport calls and standardize SMTP config to use env vars.
+- [x] Step 2: Test server restart and verify fix (node index.js, test POST /users).\n- [x] Step 3: Mark complete.\n\n**TODO complete. Nodemailer error fixed.**
