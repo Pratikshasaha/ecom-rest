@@ -110,6 +110,30 @@ app.put('/users/:id', async (req, res) => {
       data: req.body
     });
 
+
+    // Send welcome email
+    try {
+      const transporter = nodemailer.createTransporter({
+        host: 'gmail',
+        secure: true,
+        auth: {
+          user: 'info@rishfotechsolutions.com',
+          pass: 'Launch@12345'
+        }
+      });
+      
+      await transporter.sendMail({
+        from: `"Precia" <${process.env.SMTP_FROM || 'no-reply@ecom.com'}>`,
+        to: user.email,
+        subject: 'Welcome to Precia!',
+        html: `<h1>Hi ${user.name}!</h1><p>Your account has been created successfully.</p><p>User ID: ${user.id}</p><p>Email: ${user.email}</p><p>Thank you!</p>`
+      });
+      console.log('Welcome email sent to', user.email);
+    } catch (emailError) {
+      console.error('Failed to send email:', emailError);
+    }
+
+
     const { password: _, ...userWithoutPassword } = user;
     res.json(userWithoutPassword);
   } catch (error) {
