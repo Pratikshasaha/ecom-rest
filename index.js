@@ -81,7 +81,7 @@ app.put('/users/:id', async (req, res) => {
     if (Number.isNaN(id)) {
       return res.status(400).json({ error: 'Invalid user ID' });
     }
-
+console.log('---------1------- user with ID:', id, 'Data:', req.body);
     if (req.body.status === 'approved') {
       // Send welcome email
       try {
